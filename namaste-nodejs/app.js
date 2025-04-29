@@ -10,3 +10,7 @@ multiply(10,20)
 
 
 console.log(data);
+
+setTimeout(() => {
+    
+}, timeout);
