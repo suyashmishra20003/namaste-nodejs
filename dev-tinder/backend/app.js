@@ -1,29 +1,105 @@
 const express = require("express")
 const app = express()
-const  connectDB  = require('./database')
-const mongoose  = require("mongoose")
+const connectDB = require('./database')
+const mongoose = require("mongoose")
 const UserModel = require("./models/User")
 
+app.use(express.json())
 
-app.post('/signUp', async (req,res,next) => {
+app.post('/signUp', async (req, res, next) => {
 
-    const user = new UserModel({
-        firstName:'Suyash',
-        lastName:'Mishra',
-        age:28,
-        emailId:'suyash@mishra.com',
-        password:'Suyash@123'
-    }) 
+    const user = new UserModel(req.body)
 
     try {
         await user.save()
         res.send('User Sign Up successful !!')
     } catch (err) {
-        res.status(403).send('User saving failed')
+        console.error('Signup error:', err.message); // Log the detailed error message
+        res.status(403).send(`User saving failed: ${err.message}`); // Return the error message
     }
-    
+
 })
 
+//todo  Getting a single user
+app.get('/singleUser', async (req, res, next) => {
+    const userId = req.body.emailId
+    try {
+        const single = await UserModel.find({ emailId: userId })
+        res.send(single)
+    } catch (error) {
+        res.status(404).send('User Not Found')
+
+    }
+})
+
+//todo  Getting all users
+app.get('/feed', async (req, res, next) => {
+    try {
+        const users = await UserModel.find({})
+        res.send(users)
+    } catch (error) {
+        res.status(404).send('Users not found')
+
+    }
+})
+
+//todo Deleting a user
+
+app.delete('/user', async (req, res, next) => {
+    const userId = req.body._id
+    try {
+        await UserModel.deleteOne({ _id: userId })
+        res.send("User Deleted")
+    } catch (error) {
+        res.status(404).send('This user is not deleted')
+    }
+})
+
+//todo Updating a user
+
+app.patch('/user/:userId', async (req, res, next) => {
+    const id = req.body._id;
+    const userId = req.params.userId
+    // const userId = req.body.userId
+
+    //? Using updateOne
+    try {
+
+        // Data sanitization : API level validations
+        const ALLOWED_UPDATES = ['gender', 'lastName', 'age', 'password', 'photoUrl', 'about', 'skills']
+        const isUpdateAllowed = Object.keys(req.body).every((key) => ALLOWED_UPDATES.includes(key))
+
+        if (!isUpdateAllowed) {
+            throw (new Error('In0ovalid Keys Detected'))
+        }
+
+        if (req.body.skills.length > 5) {
+            throw (new Error('Skills cannot be more than 5'))
+        }
+
+        await UserModel.updateOne(
+            { _id: userId },
+            { $set: req.body }, {
+            runValidators: true
+        }
+        )
+        res.send("User Updated")
+    } catch (error) {
+        res.status(400).send({
+            message: 'UPDATE FAILED!!',
+            error: error.message
+        });
+    }
+
+    // ? Using findByIdAndUpdate
+    // try {
+    //     await UserModel.findByIdAndUpdate({_id:userId},req.body)
+    //     res.send("User Updated")
+    // } catch (error) {
+    //     res.status(404).send('This user is not updated !!')
+    // }
+
+})
 
 connectDB().then(
     () => {
