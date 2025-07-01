@@ -40,7 +40,17 @@ const UserSchema = new Schema({
         required: true,
         validate(value) {
             if (!validator.isStrongPassword(value)) {
-                throw new Error('Invalid Password!! Enter a valid one')
+                throw new Error('Password is not strong enough !! Enter a strong one')
+            }
+        }
+
+    },
+    newPassword: {
+        type: String,
+        required: false,
+        validate(value) {
+            if (!validator.isStrongPassword(value)) {
+                throw new Error('New Password is not strong enough !! Enter a strong one')
             }
         }
 

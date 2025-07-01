@@ -21,6 +21,14 @@ const validateSignUpApi = (req) => {
 
 }
 
+const validateEditProfileData = (req) => {
+    const allowdUpdates = ['gender', 'emailId', 'age', 'photoUrl', 'about', 'skills']
+    const isEditAllowed = Object.keys(req.body).every((key) => allowdUpdates.includes(key))
+
+    return isEditAllowed
+}
+
 module.exports = {
-    validateSignUpApi
+    validateSignUpApi,
+    validateEditProfileData
 }

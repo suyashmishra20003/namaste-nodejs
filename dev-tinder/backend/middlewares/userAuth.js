@@ -4,9 +4,9 @@ const UserModel = require('../models/User')
 
 const userAuth = async (req, res, next) => {
     try {
-        const cookie = req.cookies
-        const { token } = cookie
-``
+        const reqCookie = req.cookies
+        const { token } = reqCookie
+
         const decoded = jwt.verify(token, 'oneD19@1989')
 
         const user = await UserModel.findById(decoded._id)
@@ -17,13 +17,13 @@ const userAuth = async (req, res, next) => {
 
         req.user = user
 
+        console.log(token)
+
         next()
 
     } catch (err) {
         res.status(403).send('ERROR: ' + err.message)
     }
-
-    next()
 }
 
 
